@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+    image: hello-deploy:${APP_IMAGE_TAG:-local}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: "3000"
+    ports:
+      - "${APP_BIND:-0.0.0.0}:${HOST_PORT:-3000}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
